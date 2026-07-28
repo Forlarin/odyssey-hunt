@@ -2,11 +2,12 @@
 Odyssey Hunt
 ------------
 Checks Fandango's AMC Lincoln Square 13 theatre page for IMAX 70mm showtimes
-of "The Odyssey" that were previously sold out and have since opened up
-seats. Sends a push notification via ntfy.sh when that happens.
+of "The Odyssey" and sends a push notification via ntfy.sh whenever there
+are open seats — regardless of whether they were sold out before.
 
-State (which showtimes were sold out last time we checked) is stored in
-state.json so we only alert on a *change*, not every run.
+State is stored in state.json so we only notify again when the specific set
+of available showtimes actually changes, rather than spamming you every run
+while nothing's different.
 """
 
 import json
@@ -54,10 +55,6 @@ def save_state(state: dict):
 
 
 def extract_imax_slots(body_text: str) -> list[str]:
-    """
-    Returns an ordered list of tokens for each showtime slot in The Odyssey's
-    IMAX 70mm section, e.g. ['10:00a', '2:00p', '6:00p', 'Sold Out'].
-    """
     start = body_text.find(MOVIE_MARKER)
     if start == -1:
         return []
@@ -158,20 +155,20 @@ def main():
         sys.exit(0)
 
     previous = load_previous_state()
+    previous_available = set(previous.get("_available_signature", []))
 
-    newly_available = []
-    for key, info in current.items():
-        was_sold_out = previous.get(key, {}).get("sold_out")
-        is_sold_out_now = info["sold_out"]
-        if was_sold_out and not is_sold_out_now:
-            newly_available.append(info["raw_text"])
+    current_available = sorted(
+        info["raw_text"] for info in current.values() if not info["sold_out"]
+    )
+    current_available_set = set(current_available)
 
-    if newly_available:
-        msg = "Seats just opened up for:\n" + "\n".join(newly_available)
+    if current_available_set and current_available_set != previous_available:
+        msg = "Open IMAX 70mm seats right now:\n" + "\n".join(current_available)
         send_notification("The Odyssey IMAX 70mm — seats available!", msg)
     else:
-        print("No newly-available showtimes this run.")
+        print(f"No new availability to report. Currently available: {current_available}")
 
+    current["_available_signature"] = current_available
     save_state(current)
 
 

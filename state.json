@@ -1,118 +1,22 @@
 {
-  "0|screen reader users: to optimize your experience with your screen reading software, please use our flixster.com website, which has the same tickets as our fandango.com and movietickets.com websites.": {
-    "raw_text": "Screen Reader Users: To optimize your experience with your screen reading software, please use our Flixster.com website, which has the same tickets as our Fandango.com and MovieTickets.com websites.",
+  "imax_slot_0": {
+    "raw_text": "10:15a",
     "sold_out": false
   },
-  "1|streaming": {
-    "raw_text": "Streaming",
+  "imax_slot_1": {
+    "raw_text": "1:15p",
     "sold_out": false
   },
-  "2|special wwe summerslam offer for kids!\nuse code wwesummerslam at checkout!": {
-    "raw_text": "Special WWE SummerSlam Offer for Kids!\nUse code WWESUMMERSLAM at checkout!",
+  "imax_slot_2": {
+    "raw_text": "4:15p",
     "sold_out": false
   },
-  "3|get an exclusive wwe summerslam t-shirt!\nbundle includes 2 tickets and a t-shirt!": {
-    "raw_text": "Get an exclusive WWE SummerSlam t-shirt!\nBundle includes 2 tickets and a t-shirt!",
+  "imax_slot_3": {
+    "raw_text": "7:15p",
     "sold_out": false
   },
-  "4|$10 off the paw patrol-themed amazon echo pop\nwhen you buy a paw patrol: the dino movie ticket": {
-    "raw_text": "$10 off the PAW Patrol-themed Amazon Echo Pop\nWhen you buy a PAW Patrol: The Dino Movie ticket",
-    "sold_out": false
-  },
-  "5|special wwe summerslam offer for kids!\nuse code wwesummerslam at checkout!": {
-    "raw_text": "Special WWE SummerSlam Offer for Kids!\nUse code WWESUMMERSLAM at checkout!",
-    "sold_out": false
-  },
-  "6|get an exclusive wwe summerslam t-shirt!\nbundle includes 2 tickets and a t-shirt!": {
-    "raw_text": "Get an exclusive WWE SummerSlam t-shirt!\nBundle includes 2 tickets and a t-shirt!",
-    "sold_out": false
-  },
-  "7|$10 off the paw patrol-themed amazon echo pop\nwhen you buy a paw patrol: the dino movie ticket": {
-    "raw_text": "$10 off the PAW Patrol-themed Amazon Echo Pop\nWhen you buy a PAW Patrol: The Dino Movie ticket",
-    "sold_out": false
-  },
-  "8|japanese with english subtitles, laser at amc, reserved seating": {
-    "raw_text": "Japanese with English Subtitles, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "9|amc screen unseen: july 27": {
-    "raw_text": "AMC Screen Unseen: July 27",
-    "sold_out": false
-  },
-  "10|laser at amc, reserved seating": {
-    "raw_text": "Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "11|closed caption, laser at amc, reserved seating": {
-    "raw_text": "Closed caption, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "12|open caption, laser at amc, reserved seating": {
-    "raw_text": "Open caption, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "13|closed caption, accessibility devices available, laser at amc, reserved seating": {
-    "raw_text": "Closed caption, Accessibility devices available, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "14|open caption, laser at amc, reserved seating": {
-    "raw_text": "Open caption, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "15|closed caption, accessibility devices available, laser at amc, reserved seating": {
-    "raw_text": "Closed caption, Accessibility devices available, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "16|open caption, laser at amc, reserved seating": {
-    "raw_text": "Open caption, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "17|closed caption, accessibility devices available, laser at amc, reserved seating": {
-    "raw_text": "Closed caption, Accessibility devices available, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "18|closed caption, accessibility devices available, laser at amc, reserved seating": {
-    "raw_text": "Closed caption, Accessibility devices available, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "19|open caption, laser at amc, reserved seating": {
-    "raw_text": "Open caption, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "20|closed caption, accessibility devices available, laser at amc, reserved seating": {
-    "raw_text": "Closed caption, Accessibility devices available, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "21|open caption, laser at amc, reserved seating": {
-    "raw_text": "Open caption, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "22|closed caption, accessibility devices available, laser at amc, reserved seating": {
-    "raw_text": "Closed caption, Accessibility devices available, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "23|closed caption, accessibility devices available, laser at amc, reserved seating": {
-    "raw_text": "Closed caption, Accessibility devices available, Laser at AMC, Reserved seating",
-    "sold_out": false
-  },
-  "24|amc 84th street 6": {
-    "raw_text": "AMC 84TH STREET 6",
-    "sold_out": false
-  },
-  "25|amc empire 25": {
-    "raw_text": "AMC EMPIRE 25",
-    "sold_out": false
-  },
-  "26|new for streaming": {
-    "raw_text": "New For Streaming",
-    "sold_out": false
-  },
-  "27|fandango on instagram": {
-    "raw_text": "Fandango on Instagram",
-    "sold_out": false
-  },
-  "28|fandango stream": {
-    "raw_text": "Fandango Stream",
+  "imax_slot_4": {
+    "raw_text": "10:15p",
     "sold_out": false
   }
 }

@@ -57,10 +57,16 @@ def scrape_showtimes() -> dict:
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page(user_agent=(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-        ))
+        context = browser.new_context(
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+            ),
+            geolocation={"latitude": 40.7736, "longitude": -73.9566},  # Lincoln Square, NYC
+            permissions=["geolocation"],
+            locale="en-US",
+        )
+        page = context.new_page()
 
         debug_dir = Path(__file__).parent / "debug"
         debug_dir.mkdir(exist_ok=True)
@@ -86,7 +92,7 @@ def scrape_showtimes() -> dict:
 
         try:
             page.click("text=Select a Theatre", timeout=10000)
-            page.wait_for_timeout(1500)
+            page.wait_for_timeout(4000)
             snapshot("02_after_clicking_select_theatre")
         except Exception as e:
             print(f"Could not click 'Select a Theatre': {e}")
@@ -135,6 +141,7 @@ def scrape_showtimes() -> dict:
             key = text.lower().replace("\n", "|")
             results[key] = {"raw_text": text, "sold_out": sold_out}
 
+        context.close()
         browser.close()
 
     return results

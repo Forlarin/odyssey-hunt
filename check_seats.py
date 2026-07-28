@@ -12,7 +12,6 @@ state.json so we only alert on a *change*, not every run.
 import json
 import os
 import sys
-import time
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -52,7 +51,7 @@ def save_state(state: dict):
 def scrape_showtimes() -> dict:
     """
     Returns a dict like:
-      { "2026-08-02|7:00pm": {"sold_out": False, "date": "2026-08-02", "time": "7:00pm"} }
+      { "2026-08-02|7:00pm": {"sold_out": False, "raw_text": "7:00pm"} }
     """
     results = {}
 
@@ -64,18 +63,13 @@ def scrape_showtimes() -> dict:
         ))
 
         page.goto(MOVIE_URL, wait_until="domcontentloaded", timeout=90000)
-   # Give client-side JS a beat to render content after DOM loads,
-   # since "networkidle" is unreliable on sites with constant background
-   # network activity (analytics, ads, etc).
-   page.wait_for_timeout(5000)
+        page.wait_for_timeout(5000)
 
-        # Handle cookie banner if present
         try:
             page.click("text=Accept", timeout=5000)
         except Exception:
             pass
 
-        # Select the theatre via the search box
         try:
             page.click("text=Select a Theatre", timeout=10000)
         except Exception:
@@ -91,15 +85,12 @@ def scrape_showtimes() -> dict:
 
         page.wait_for_timeout(3000)
 
-        # Try to filter to IMAX 70mm if a format filter chip exists
         try:
             page.click("text=IMAX 70mm", timeout=5000)
             page.wait_for_timeout(2000)
         except Exception:
             print("Could not click an IMAX 70mm filter chip (may already be filtered or named differently)")
 
-        # Grab all showtime elements. AMC marks sold-out showtimes with
-        # either a disabled button or visible "Sold Out" text.
         showtime_buttons = page.locator("[data-testid*='showtime'], button:has-text('PM'), button:has-text('AM')")
         count = showtime_buttons.count()
         print(f"Found {count} candidate showtime elements")

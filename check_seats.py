@@ -65,8 +65,15 @@ def scrape_showtimes() -> dict:
             geolocation={"latitude": 40.7736, "longitude": -73.9566},  # Lincoln Square, NYC
             permissions=["geolocation"],
             locale="en-US",
+            viewport={"width": 1366, "height": 900},
         )
         page = context.new_page()
+        page.add_init_script("""
+            Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+            window.chrome = window.chrome || { runtime: {} };
+            Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});
+            Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+        """)
 
         debug_dir = Path(__file__).parent / "debug"
         debug_dir.mkdir(exist_ok=True)

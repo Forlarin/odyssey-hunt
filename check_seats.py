@@ -77,9 +77,12 @@ def scrape_showtimes() -> dict:
         snapshot("01_initial_load")
 
         try:
-            page.click("text=Accept", timeout=5000)
-        except Exception:
-            pass
+            page.evaluate("""
+                document.querySelectorAll('[class*="osano"], [id*="osano"]').forEach(el => el.remove());
+                document.body.style.overflow = 'auto';
+            """)
+        except Exception as e:
+            print(f"Could not remove cookie banner: {e}")
 
         try:
             page.click("text=Select a Theatre", timeout=10000)

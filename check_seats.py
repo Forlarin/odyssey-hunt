@@ -164,8 +164,7 @@ def main():
 
     if current_available_set and current_available_set != previous_available:
         msg = "Open IMAX 70mm seats right now:\n" + "\n".join(current_available)
-        send_notification("The Odyssey IMAX 70mm — seats available!", msg)
-    else:
+send_notification("The Odyssey IMAX 70mm - seats available!", msg)    else:
         print(f"No new availability to report. Currently available: {current_available}")
 
     current["_available_signature"] = current_available

@@ -1,9 +1,9 @@
 """
 Odyssey Hunt
 ------------
-Checks AMC Lincoln Square 13 for IMAX 70mm showtimes of "The Odyssey" that
-were previously sold out and have since opened up seats. Sends a push
-notification via ntfy.sh when that happens.
+Checks Fandango's AMC Lincoln Square 13 theatre page for IMAX 70mm showtimes
+of "The Odyssey" that were previously sold out and have since opened up
+seats. Sends a push notification via ntfy.sh when that happens.
 
 State (which showtimes were sold out last time we checked) is stored in
 state.json so we only alert on a *change*, not every run.
@@ -16,8 +16,8 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-MOVIE_URL = "https://www.amctheatres.com/movies/the-odyssey-76238/showtimes"
-THEATRE_SEARCH_TEXT = "AMC Lincoln Square 13"
+THEATRE_URL = "https://www.fandango.com/amc-lincoln-square-13-aabqi/theater-page"
+MOVIE_NAME_HINT = "odyssey"
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "odyssey-hunt")
 STATE_FILE = Path(__file__).parent / "state.json"
 
@@ -51,7 +51,7 @@ def save_state(state: dict):
 def scrape_showtimes() -> dict:
     """
     Returns a dict like:
-      { "2026-08-02|7:00pm": {"sold_out": False, "raw_text": "7:00pm"} }
+      { "the odyssey|imax|7:00pm": {"sold_out": False, "raw_text": "7:00pm"} }
     """
     results = {}
 
@@ -62,8 +62,6 @@ def scrape_showtimes() -> dict:
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                 "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
             ),
-            geolocation={"latitude": 40.7736, "longitude": -73.9566},  # Lincoln Square, NYC
-            permissions=["geolocation"],
             locale="en-US",
             viewport={"width": 1366, "height": 900},
         )
@@ -85,51 +83,43 @@ def scrape_showtimes() -> dict:
             except Exception as e:
                 print(f"Could not capture snapshot '{label}': {e}")
 
-        page.goto(MOVIE_URL, wait_until="domcontentloaded", timeout=90000)
-        page.wait_for_timeout(5000)
+        page.goto(THEATRE_URL, wait_until="domcontentloaded", timeout=90000)
+        page.wait_for_timeout(6000)
         snapshot("01_initial_load")
 
         try:
             page.evaluate("""
-                document.querySelectorAll('[class*="osano"], [id*="osano"]').forEach(el => el.remove());
+                document.querySelectorAll(
+                    '[id*="onetrust"], [class*="onetrust"], [id*="osano"], [class*="osano"], [id*="cookie"], [class*="cookie-banner"]'
+                ).forEach(el => el.remove());
                 document.body.style.overflow = 'auto';
             """)
         except Exception as e:
             print(f"Could not remove cookie banner: {e}")
 
         try:
-            page.click("text=Select a Theatre", timeout=10000)
+            page.mouse.wheel(0, 800)
             page.wait_for_timeout(4000)
-            snapshot("02_after_clicking_select_theatre")
+            snapshot("02_after_scroll")
         except Exception as e:
-            print(f"Could not click 'Select a Theatre': {e}")
-            snapshot("02_failed_to_click_select_theatre")
+            print(f"Scroll step failed: {e}")
 
         try:
-            search_box = page.locator("input[type='text']").first
-            search_box.fill(THEATRE_SEARCH_TEXT)
-            page.wait_for_timeout(1500)
-            snapshot("03_after_typing_theatre_name")
-            page.locator(f"text={THEATRE_SEARCH_TEXT}").first.click(timeout=10000)
-            page.wait_for_timeout(1500)
-            snapshot("04_after_selecting_theatre")
-        except Exception as e:
-            print(f"Could not select theatre automatically: {e}")
-            snapshot("03_failed_theatre_search")
-
-        page.wait_for_timeout(3000)
-
-        try:
-            page.click("text=IMAX 70mm", timeout=5000)
-            page.wait_for_timeout(2000)
-            snapshot("05_after_imax_filter")
+            page.wait_for_selector("text=Loading calendar", state="detached", timeout=20000)
         except Exception:
-            print("Could not click an IMAX 70mm filter chip (may already be filtered or named differently)")
-            snapshot("05_failed_imax_filter")
+            print("'Loading calendar' placeholder never disappeared (may indicate blocked data fetch)")
+        snapshot("03_after_waiting_for_calendar")
 
-        showtime_buttons = page.locator("[data-testid*='showtime'], button:has-text('PM'), button:has-text('AM')")
+        page.wait_for_timeout(2000)
+        snapshot("04_final_state")
+
+        odyssey_blocks = page.locator(f"text=/{MOVIE_NAME_HINT}/i")
+        block_count = odyssey_blocks.count()
+        print(f"Found {block_count} elements mentioning '{MOVIE_NAME_HINT}'")
+
+        showtime_buttons = page.locator("button:has-text('PM'), button:has-text('AM'), a:has-text('PM'), a:has-text('AM')")
         count = showtime_buttons.count()
-        print(f"Found {count} candidate showtime elements")
+        print(f"Found {count} candidate showtime elements total on page")
 
         for i in range(count):
             el = showtime_buttons.nth(i)
@@ -144,8 +134,13 @@ def scrape_showtimes() -> dict:
                 is_disabled = el.is_disabled()
             except Exception:
                 pass
-            sold_out = is_disabled or "sold out" in text.lower()
-            key = text.lower().replace("\n", "|")
+            class_attr = ""
+            try:
+                class_attr = el.get_attribute("class") or ""
+            except Exception:
+                pass
+            sold_out = is_disabled or "sold out" in text.lower() or "sold-out" in class_attr.lower() or "disabled" in class_attr.lower()
+            key = f"{i}|{text.lower()}"
             results[key] = {"raw_text": text, "sold_out": sold_out}
 
         context.close()

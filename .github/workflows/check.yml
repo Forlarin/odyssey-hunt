@@ -2,9 +2,8 @@ name: Odyssey Seat Check
 
 on:
   schedule:
-    # Every 20 minutes. GitHub may delay this slightly during high load.
     - cron: "*/20 * * * *"
-  workflow_dispatch: {}   # lets you trigger it manually from the Actions tab
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -28,6 +27,15 @@ jobs:
         env:
           NTFY_TOPIC: odyssey-hunt
         run: python check_seats.py
+
+      - name: Upload debug snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-snapshots
+          path: debug/
+          retention-days: 3
+          if-no-files-found: ignore
 
       - name: Commit updated state
         run: |

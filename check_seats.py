@@ -63,7 +63,11 @@ def scrape_showtimes() -> dict:
             "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
         ))
 
-        page.goto(MOVIE_URL, wait_until="networkidle", timeout=60000)
+        page.goto(MOVIE_URL, wait_until="domcontentloaded", timeout=90000)
+   # Give client-side JS a beat to render content after DOM loads,
+   # since "networkidle" is unreliable on sites with constant background
+   # network activity (analytics, ads, etc).
+   page.wait_for_timeout(5000)
 
         # Handle cookie banner if present
         try:

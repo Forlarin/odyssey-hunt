@@ -62,8 +62,19 @@ def scrape_showtimes() -> dict:
             "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
         ))
 
+        debug_dir = Path(__file__).parent / "debug"
+        debug_dir.mkdir(exist_ok=True)
+
+        def snapshot(label: str):
+            try:
+                page.screenshot(path=str(debug_dir / f"{label}.png"), full_page=True)
+                (debug_dir / f"{label}.html").write_text(page.content())
+            except Exception as e:
+                print(f"Could not capture snapshot '{label}': {e}")
+
         page.goto(MOVIE_URL, wait_until="domcontentloaded", timeout=90000)
         page.wait_for_timeout(5000)
+        snapshot("01_initial_load")
 
         try:
             page.click("text=Accept", timeout=5000)
@@ -72,24 +83,33 @@ def scrape_showtimes() -> dict:
 
         try:
             page.click("text=Select a Theatre", timeout=10000)
-        except Exception:
-            pass
+            page.wait_for_timeout(1500)
+            snapshot("02_after_clicking_select_theatre")
+        except Exception as e:
+            print(f"Could not click 'Select a Theatre': {e}")
+            snapshot("02_failed_to_click_select_theatre")
 
         try:
             search_box = page.locator("input[type='text']").first
             search_box.fill(THEATRE_SEARCH_TEXT)
             page.wait_for_timeout(1500)
+            snapshot("03_after_typing_theatre_name")
             page.locator(f"text={THEATRE_SEARCH_TEXT}").first.click(timeout=10000)
+            page.wait_for_timeout(1500)
+            snapshot("04_after_selecting_theatre")
         except Exception as e:
             print(f"Could not select theatre automatically: {e}")
+            snapshot("03_failed_theatre_search")
 
         page.wait_for_timeout(3000)
 
         try:
             page.click("text=IMAX 70mm", timeout=5000)
             page.wait_for_timeout(2000)
+            snapshot("05_after_imax_filter")
         except Exception:
             print("Could not click an IMAX 70mm filter chip (may already be filtered or named differently)")
+            snapshot("05_failed_imax_filter")
 
         showtime_buttons = page.locator("[data-testid*='showtime'], button:has-text('PM'), button:has-text('AM')")
         count = showtime_buttons.count()

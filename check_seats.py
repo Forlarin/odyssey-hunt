@@ -11,15 +11,20 @@ state.json so we only alert on a *change*, not every run.
 
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
 THEATRE_URL = "https://www.fandango.com/amc-lincoln-square-13-aabqi/theater-page"
-MOVIE_NAME_HINT = "odyssey"
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "odyssey-hunt")
 STATE_FILE = Path(__file__).parent / "state.json"
+
+MOVIE_MARKER = "The Odyssey"
+NEXT_MOVIE_MARKERS = ["Moana (2026)", "Minions & Monsters", "NEARBY THEATERS", "Nearby Theaters"]
+FORMAT_MARKER = "IMAX"
+BLOCK_END_MARKER = "Check Seats"
 
 
 def send_notification(title: str, message: str):
@@ -48,11 +53,35 @@ def save_state(state: dict):
     STATE_FILE.write_text(json.dumps(state, indent=2))
 
 
+def extract_imax_slots(body_text: str) -> list[str]:
+    """
+    Returns an ordered list of tokens for each showtime slot in The Odyssey's
+    IMAX 70mm section, e.g. ['10:00a', '2:00p', '6:00p', 'Sold Out'].
+    """
+    start = body_text.find(MOVIE_MARKER)
+    if start == -1:
+        return []
+
+    end = len(body_text)
+    for marker in NEXT_MOVIE_MARKERS:
+        idx = body_text.find(marker, start + len(MOVIE_MARKER))
+        if idx != -1:
+            end = min(end, idx)
+
+    section = body_text[start:end]
+
+    imax_idx = section.find(FORMAT_MARKER)
+    if imax_idx == -1:
+        return []
+
+    block_end_idx = section.find(BLOCK_END_MARKER, imax_idx)
+    imax_block = section[imax_idx:block_end_idx] if block_end_idx != -1 else section[imax_idx:imax_idx + 400]
+
+    tokens = re.findall(r"\d{1,2}:\d{2}\s?[apAP][mM]?|Sold Out", imax_block, re.IGNORECASE)
+    return tokens
+
+
 def scrape_showtimes() -> dict:
-    """
-    Returns a dict like:
-      { "the odyssey|imax|7:00pm": {"sold_out": False, "raw_text": "7:00pm"} }
-    """
     results = {}
 
     with sync_playwright() as p:
@@ -85,7 +114,6 @@ def scrape_showtimes() -> dict:
 
         page.goto(THEATRE_URL, wait_until="domcontentloaded", timeout=90000)
         page.wait_for_timeout(6000)
-        snapshot("01_initial_load")
 
         try:
             page.evaluate("""
@@ -98,50 +126,23 @@ def scrape_showtimes() -> dict:
             print(f"Could not remove cookie banner: {e}")
 
         try:
-            page.mouse.wheel(0, 800)
-            page.wait_for_timeout(4000)
-            snapshot("02_after_scroll")
-        except Exception as e:
-            print(f"Scroll step failed: {e}")
-
-        try:
             page.wait_for_selector("text=Loading calendar", state="detached", timeout=20000)
         except Exception:
-            print("'Loading calendar' placeholder never disappeared (may indicate blocked data fetch)")
-        snapshot("03_after_waiting_for_calendar")
+            pass
 
         page.wait_for_timeout(2000)
-        snapshot("04_final_state")
+        snapshot("final_state")
 
-        odyssey_blocks = page.locator(f"text=/{MOVIE_NAME_HINT}/i")
-        block_count = odyssey_blocks.count()
-        print(f"Found {block_count} elements mentioning '{MOVIE_NAME_HINT}'")
+        body_text = page.inner_text("body")
+        (debug_dir / "body_text.txt").write_text(body_text)
 
-        showtime_buttons = page.locator("button:has-text('PM'), button:has-text('AM'), a:has-text('PM'), a:has-text('AM')")
-        count = showtime_buttons.count()
-        print(f"Found {count} candidate showtime elements total on page")
+        slots = extract_imax_slots(body_text)
+        print(f"Found {len(slots)} IMAX 70mm slot tokens for The Odyssey: {slots}")
 
-        for i in range(count):
-            el = showtime_buttons.nth(i)
-            try:
-                text = el.inner_text(timeout=2000).strip()
-            except Exception:
-                continue
-            if not text:
-                continue
-            is_disabled = False
-            try:
-                is_disabled = el.is_disabled()
-            except Exception:
-                pass
-            class_attr = ""
-            try:
-                class_attr = el.get_attribute("class") or ""
-            except Exception:
-                pass
-            sold_out = is_disabled or "sold out" in text.lower() or "sold-out" in class_attr.lower() or "disabled" in class_attr.lower()
-            key = f"{i}|{text.lower()}"
-            results[key] = {"raw_text": text, "sold_out": sold_out}
+        for i, token in enumerate(slots):
+            sold_out = "sold out" in token.lower()
+            key = f"imax_slot_{i}"
+            results[key] = {"raw_text": token, "sold_out": sold_out}
 
         context.close()
         browser.close()

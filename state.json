@@ -43,6 +43,10 @@
     "raw_text": "6:00p",
     "sold_out": false
   },
+  "imax_slot_11": {
+    "raw_text": "7:00p",
+    "sold_out": false
+  },
   "_available_signature": [
     "10:00a",
     "10:00a",
@@ -54,6 +58,7 @@
     "4:00p",
     "4:15p",
     "6:00p",
+    "7:00p",
     "7:00p"
   ]
 }

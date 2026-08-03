@@ -7,8 +7,18 @@
     "raw_text": "4:00p",
     "sold_out": false
   },
+  "imax_slot_2": {
+    "raw_text": "7:00p",
+    "sold_out": false
+  },
+  "imax_slot_3": {
+    "raw_text": "7:15p",
+    "sold_out": false
+  },
   "_available_signature": [
     "4:00p",
+    "7:00p",
+    "7:15p",
     "9:00a"
   ]
 }

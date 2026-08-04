@@ -1,24 +1,14 @@
 {
   "imax_slot_0": {
-    "raw_text": "9:00a",
+    "raw_text": "10:30a",
     "sold_out": false
   },
   "imax_slot_1": {
-    "raw_text": "4:00p",
-    "sold_out": false
-  },
-  "imax_slot_2": {
-    "raw_text": "7:00p",
-    "sold_out": false
-  },
-  "imax_slot_3": {
-    "raw_text": "7:15p",
+    "raw_text": "4:15p",
     "sold_out": false
   },
   "_available_signature": [
-    "4:00p",
-    "7:00p",
-    "7:15p",
-    "9:00a"
+    "10:30a",
+    "4:15p"
   ]
 }

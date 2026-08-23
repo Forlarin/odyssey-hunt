@@ -19,14 +19,9 @@
     "raw_text": "10:00p",
     "sold_out": false
   },
-  "imax_slot_5": {
-    "raw_text": "2:00a",
-    "sold_out": false
-  },
   "_available_signature": [
     "10:00a",
     "10:00p",
-    "2:00a",
     "2:00p",
     "6:00a",
     "6:00p"

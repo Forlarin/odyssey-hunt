@@ -1,21 +1,17 @@
 {
   "imax_slot_0": {
-    "raw_text": "6:00a",
-    "sold_out": false
-  },
-  "imax_slot_1": {
     "raw_text": "10:00a",
     "sold_out": false
   },
-  "imax_slot_2": {
+  "imax_slot_1": {
     "raw_text": "2:00p",
     "sold_out": false
   },
-  "imax_slot_3": {
+  "imax_slot_2": {
     "raw_text": "6:00p",
     "sold_out": false
   },
-  "imax_slot_4": {
+  "imax_slot_3": {
     "raw_text": "10:00p",
     "sold_out": false
   },
@@ -23,7 +19,6 @@
     "10:00a",
     "10:00p",
     "2:00p",
-    "6:00a",
     "6:00p"
   ]
 }
